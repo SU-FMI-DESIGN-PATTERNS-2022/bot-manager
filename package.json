@@ -1,0 +1,38 @@
+{
+  "name": "rosen-template",
+  "version": "1.0.0",
+  "author": "Rosen Santev",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/R-Santev/api-template.git"
+  },
+  "scripts": {
+    "preinstall": "node checkNodeVersion",
+    "prestart": "node checkNodeVersion",
+    "start": "ts-node-dev --respawn --transpile-only ./src/index.ts",
+    "build": "tsc --sourcemap",
+    "prod": "node ./dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "@octokit/rest": "^19.0.5",
+    "cors": "2.8.5",
+    "dotenv": "10.0.0",
+    "express": "4.17.1",
+    "mongoose": "6.0.13",
+    "os-utils": "^0.0.14",
+    "winston": "3.3.3"
+  },
+  "devDependencies": {
+    "@types/cors": "2.8.12",
+    "@types/express": "4.17.13",
+    "@types/os-utils": "^0.0.1",
+    "@typescript-eslint/eslint-plugin": "5.3.1",
+    "@typescript-eslint/parser": "5.3.1",
+    "eslint": "8.2.0",
+    "eslint-config-google": "0.14.0",
+    "eslint-plugin-jsdoc": "37.0.3",
+    "ts-node-dev": "1.1.8",
+    "typescript": "4.4.4"
+  }
+}
