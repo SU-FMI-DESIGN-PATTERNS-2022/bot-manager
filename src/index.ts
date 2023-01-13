@@ -25,7 +25,7 @@ app.use(errorHandler);
 
 let server: http.Server | undefined;
 
-server = app.listen(PORT, () => logger.info(`Server is listening on port: ${PORT}`));
+app.listen(PORT, () => logger.info(`Server is listening on port: ${PORT}`));
 
 
 process.on('SIGTERM', () => {
