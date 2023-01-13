@@ -20,9 +20,14 @@ const consoleTransport = new winston.transports.Console({
   level: process.env.LOG_LEVEL ? process.env.LOG_LEVEL : 'debug'
 });
 
+const fileTransport = new winston.transports.File({
+  level: process.env.LOG_LEVEL ? process.env.LOG_LEVEL : 'debug',
+  filename: './logs/'
+});
+
 const winstonConfig = {
   format,
-  transports: [consoleTransport],
+  transports: [consoleTransport, fileTransport],
   exitOnError: false
 };
 
