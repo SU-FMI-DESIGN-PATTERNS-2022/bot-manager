@@ -20,3 +20,5 @@
 // export const HEALTH_CHECK = getEnvironmentVariable('HEALTH_CHECK_LOAD_INTERVAL');
 
 export const PORT = process.env.PORT || 5000;
+
+export const ACCOUNT_SERVICE_API = 'link';
