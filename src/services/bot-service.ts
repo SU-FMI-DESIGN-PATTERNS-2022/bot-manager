@@ -1,10 +1,13 @@
 import { Strategy } from '../strategies/strategy'; // todo
 import { PrismaClient } from '@prisma/client';
-import { Bot } from '../models/bot'; // todo
+import { Bot } from '../models/bot-model';
+import logger from '../utils/logger';
 
 const prisma = new PrismaClient();
 
-export class BotModel {
+export class BotService {
+    constructor() {}
+
     async createBot(
         ticker: string,
         strategy: Strategy,
@@ -25,6 +28,8 @@ export class BotModel {
                 updatedAt: new Date()
             }
         });
+
+        logger.info(`Bot created: ${bot.id}`);
         return bot;
     }
 
@@ -34,11 +39,19 @@ export class BotModel {
                 id: id
             }
         });
+
+        if (bot === null) {
+            throw new Error('Bot not found.');
+        }
+
+        logger.info(`Bot retrieved: ${id}`);
         return bot;
     }
 
     async getAllBots(): Promise<Bot[]> {
         const bots = await prisma.bot.findMany();
+
+        logger.info(`All bots retrieved.`);
         return bots;
     }
 
@@ -48,6 +61,8 @@ export class BotModel {
                 userId: userId
             }
         });
+
+        logger.info(`All bots retrieved for user: ${userId}`);
         return bots;
     }
 
@@ -67,47 +82,66 @@ export class BotModel {
                 updatedAt: new Date()
             }
         });
+
+        logger.info(`Bot updated: ${id}`);
         return updatedBot;
     }
 
-    async deleteBot(id: string): Promise<Bot> {
-        const deletedBot = await prisma.bot.delete({
+    async deleteBot(id: string): Promise<void> {
+        const targetBot = await prisma.bot.findUnique({
             where: {
                 id: id
             }
         });
-        return deletedBot;
-    }
 
-    async deleteAllBots(): Promise<void> {
-        const deletedBots = await prisma.bot.deleteMany();
-        return;
-    }
+        if (targetBot === null) {
+            throw new Error('Bot not found.');
+        }
 
-    async deleteAllBotsByUserId(userId: string): Promise<void> {
-        const deletedBots = await prisma.bot.deleteMany({
+        if (targetBot.isActive) {
+            throw new Error('Bot is active. Cannot delete.');
+        }
+
+        await prisma.bot.delete({
             where: {
-                userId: userId
+                id: id
             }
         });
-        return;
+
+        // TODO: transfer all money to the user's cash
+
+        logger.info(`Bot deleted: ${id}`);
     }
 
-    async deleteAllBotsByTicker(ticker: string): Promise<void> {
-        const deletedBots = await prisma.bot.deleteMany({
+    async deleteBotByTicker(ticker: string): Promise<void> {
+        const targetBot = await prisma.bot.findUnique({
             where: {
                 ticker: ticker
             }
         });
-        return;
-    }
 
-    async deleteAllBotsByStrategy(strategy: Strategy): Promise<void> {
-        const deletedBots = await prisma.bot.deleteMany({
+        if (targetBot === null) {
+            throw new Error('Bot not found.');
+        }
+
+        if (targetBot.isActive) {
+            throw new Error('Bot is active. Cannot delete.');
+        }
+
+        // TODO: transfer all money to the user's cash
+
+        await prisma.bot.delete({
             where: {
-                strategy: strategy
+                ticker: ticker
             }
         });
-        return;
+
+        logger.info(`Bot deleted: ${ticker}`);
+    }
+
+    async deleteAllBots(): Promise<void> {
+        await prisma.bot.deleteMany();
+
+        logger.info('All bots deleted.');
     }
 }
