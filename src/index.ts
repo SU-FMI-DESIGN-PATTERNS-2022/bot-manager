@@ -2,6 +2,7 @@ import express, { Express } from 'express';
 import http from 'http';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { PrismaClient } from '@prisma/client';
 
 import mongoose from './config/mongoose';
 
