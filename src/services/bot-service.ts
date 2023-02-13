@@ -1,46 +1,74 @@
-import { Strategy } from '../strategies/strategy'; // todo
-import { PrismaClient } from '@prisma/client';
+import mongoose, { Model } from 'mongoose';
 import { Bot } from '../models/bot-model';
 import logger from '../utils/logger';
 
-const prisma = new PrismaClient();
+const BotSchema = new mongoose.Schema({
+    ticker: {
+        type: String,
+        required: true,
+    },
+    strategy: {
+        type: String,
+        required: true,
+    },
+    balance: {
+        type: Number,
+        required: true,
+    },
+    isActive: {
+        type: Boolean,
+        required: true,
+    },
+    cash: {
+        type: Number,
+        required: true,
+    },
+    userId: {
+        type: String,
+        required: true,
+    },
+    createdAt: {
+        type: Date,
+        required: true,
+    },
+    updatedAt: {
+        type: Date,
+        required: true,
+    },
+});
+
+const BotModel: Model<Bot> = mongoose.model('Bot', BotSchema);
 
 export class BotService {
     constructor() {}
 
     async createBot(
         ticker: string,
-        strategy: Strategy,
+        strategy: string,
         balance: number,
         isActive: boolean,
         cash: number,
-        userId: string)
-        : Promise<Bot> {
-        const bot = await prisma.bot.create({
-            data: {
-                ticker: ticker,
-                strategy: strategy,
-                balance: balance,
-                isActive: isActive,
-                cash: cash,
-                userId: userId,
-                createdAt: new Date(),
-                updatedAt: new Date()
-            }
+        userId: string
+    ): Promise<Bot> {
+        const bot = await BotModel.create({
+            ticker,
+            strategy,
+            balance,
+            isActive,
+            cash,
+            userId,
+            createdAt: new Date(),
+            updatedAt: new Date(),
         });
 
-        logger.info(`Bot created: ${bot.id}`);
+        logger.info(`Bot created: ${bot._id}`);
         return bot;
     }
 
     async getBotById(id: string): Promise<Bot> {
-        const bot = await prisma.bot.findUnique({
-            where: {
-                id: id
-            }
-        });
+        const bot = await BotModel.findById(id);
 
-        if (bot === null) {
+        if (!bot) {
             throw new Error('Bot not found.');
         }
 
@@ -49,29 +77,23 @@ export class BotService {
     }
 
     async getAllBots(): Promise<Bot[]> {
-        const bots = await prisma.bot.findMany();
+        const bots = await BotModel.find();
 
         logger.info(`All bots retrieved.`);
         return bots;
     }
 
     async getAllBotsByUserId(userId: string): Promise<Bot[]> {
-        const bots = await prisma.bot.findMany({
-            where: {
-                userId: userId
-            }
-        });
+        const bots = await BotModel.find({ userId });
 
         logger.info(`All bots retrieved for user: ${userId}`);
         return bots;
     }
 
     async updateBot(id: string, bot: Bot): Promise<Bot> {
-        const updatedBot = await prisma.bot.update({
-            where: {
-                id: id
-            },
-            data: {
+        const updatedBot = await BotModel.findByIdAndUpdate(
+            id,
+            {
                 ticker: bot.ticker,
                 strategy: bot.strategy,
                 balance: bot.balance,
@@ -79,22 +101,23 @@ export class BotService {
                 cash: bot.cash,
                 userId: bot.userId,
                 createdAt: bot.createdAt,
-                updatedAt: new Date()
-            }
-        });
+                updatedAt: new Date(),
+            },
+            { new: true }
+        );
+
+        if (!updatedBot) {
+            throw new Error('Bot not found.');
+        }
 
         logger.info(`Bot updated: ${id}`);
         return updatedBot;
     }
 
     async deleteBot(id: string): Promise<void> {
-        const targetBot = await prisma.bot.findUnique({
-            where: {
-                id: id
-            }
-        });
+        const targetBot = await BotModel.findById(id);
 
-        if (targetBot === null) {
+        if (!targetBot) {
             throw new Error('Bot not found.');
         }
 
@@ -102,25 +125,17 @@ export class BotService {
             throw new Error('Bot is active. Cannot delete.');
         }
 
-        await prisma.bot.delete({
-            where: {
-                id: id
-            }
-        });
-
         // TODO: transfer all money to the user's cash
+
+        await targetBot.remove();
 
         logger.info(`Bot deleted: ${id}`);
     }
 
     async deleteBotByTicker(ticker: string): Promise<void> {
-        const targetBot = await prisma.bot.findUnique({
-            where: {
-                ticker: ticker
-            }
-        });
+        const targetBot = await BotModel.findOne({ ticker });
 
-        if (targetBot === null) {
+        if (!targetBot) {
             throw new Error('Bot not found.');
         }
 
@@ -130,17 +145,13 @@ export class BotService {
 
         // TODO: transfer all money to the user's cash
 
-        await prisma.bot.delete({
-            where: {
-                ticker: ticker
-            }
-        });
+        await targetBot.remove();
 
         logger.info(`Bot deleted: ${ticker}`);
     }
 
     async deleteAllBots(): Promise<void> {
-        await prisma.bot.deleteMany();
+        await BotModel.deleteMany();
 
         logger.info('All bots deleted.');
     }

@@ -2,9 +2,8 @@ import express, { Express } from 'express';
 import http from 'http';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { PrismaClient } from '@prisma/client';
 
-import mongoose from './config/mongoose';
+import mongoose from './services/database-service';
 
 import errorHandler from './middlewares/errorHandler';
 
@@ -14,10 +13,11 @@ import logger from './utils/logger';
 
 import { PORT } from './config/config';
 
-// dotenv.config();
+dotenv.config();
 const app = express();
 
-// mongoose.connectDB(() => afterConnect(app), false);
+mongoose.connectToDatabase(() => afterConnect(app), false);
+
 
 app.use(cors());
 app.use(express.json());
