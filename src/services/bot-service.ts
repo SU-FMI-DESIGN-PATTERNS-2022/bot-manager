@@ -1,43 +1,5 @@
-import mongoose, { Model } from 'mongoose';
-import { Bot } from '../models/bot-model';
+import BotModel, { Bot } from '../models/bot-model';
 import logger from '../utils/logger';
-
-const BotSchema = new mongoose.Schema({
-    ticker: {
-        type: String,
-        required: true,
-    },
-    strategy: {
-        type: String,
-        required: true,
-    },
-    balance: {
-        type: Number,
-        required: true,
-    },
-    isActive: {
-        type: Boolean,
-        required: true,
-    },
-    cash: {
-        type: Number,
-        required: true,
-    },
-    userId: {
-        type: String,
-        required: true,
-    },
-    createdAt: {
-        type: Date,
-        required: true,
-    },
-    updatedAt: {
-        type: Date,
-        required: true,
-    },
-});
-
-const BotModel: Model<Bot> = mongoose.model('Bot', BotSchema);
 
 export class BotService {
     constructor() {}
@@ -45,17 +7,17 @@ export class BotService {
     async createBot(
         ticker: string,
         strategy: string,
-        balance: number,
+        initBalance: number,
+        currentBalance: number,
         isActive: boolean,
-        cash: number,
         userId: string
     ): Promise<Bot> {
         const bot = await BotModel.create({
             ticker,
             strategy,
-            balance,
+            initBalance,
+            currentBalance,
             isActive,
-            cash,
             userId,
             createdAt: new Date(),
             updatedAt: new Date(),
@@ -96,9 +58,9 @@ export class BotService {
             {
                 ticker: bot.ticker,
                 strategy: bot.strategy,
-                balance: bot.balance,
+                initBalance: bot.initBalance,
+                currentBalance: bot.currentBalance,
                 isActive: bot.isActive,
-                cash: bot.cash,
                 userId: bot.userId,
                 createdAt: bot.createdAt,
                 updatedAt: new Date(),

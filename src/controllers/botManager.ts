@@ -6,7 +6,7 @@ export class BotManager {
     private static instance: BotManager;
     private bots: Bot[] = [];
 
-    private constructor() {
+    public constructor() {
         const botService = new BotService();
         botService.getAllBots().then((bots) => {
             this.bots = bots;
@@ -23,7 +23,7 @@ export class BotManager {
     async createBot(
         ticker: string,
         strategy: string,
-        balance: number,
+        initBalance: number,
         isActive: boolean,
         userId: string
     ): Promise<Bot> {
@@ -33,9 +33,9 @@ export class BotManager {
         const bot = await botService.createBot(
             ticker,
             strategy,
-            balance,
+            initBalance,
+            initBalance,
             isActive,
-            0,
             userId
         );
 
@@ -92,3 +92,5 @@ export class BotManager {
 
     // TODO: Update bot
 }
+
+export default new BotManager();
