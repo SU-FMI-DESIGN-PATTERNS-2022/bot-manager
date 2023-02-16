@@ -5,10 +5,10 @@ import { BotService } from '../services/bot-service';
 export class BotManager {
     private static instance: BotManager;
     private bots: Bot[] = [];
-
+    private botService: BotService;
     public constructor() {
-        const botService = new BotService();
-        botService.getAllBots().then((bots) => {
+        this.botService = new BotService();
+        this.botService.getAllBots().then((bots) => {
             this.bots = bots;
         });
     }
@@ -29,8 +29,7 @@ export class BotManager {
     ): Promise<Bot> {
         // TODO: check if user has enough cash, if not throw an error
 
-        const botService = new BotService();
-        const bot = await botService.createBot(
+        const bot = await this.botService.createBot(
             ticker,
             strategy,
             initBalance,
@@ -43,26 +42,26 @@ export class BotManager {
         return bot;
     }
 
-    async startBot(bot: Bot): Promise<void> {
-        const index = this.bots.indexOf(bot);
+    async startBot(botId: string): Promise<void> {
+        const index = this.bots.findIndex((bot) => bot.id === botId);
         if (index === -1) {
             throw new Error('Bot not found.');
         }
         this.bots[index].isActive = true;
-        logger.info(`Bot started: ${bot.id}`);
+        logger.info(`Bot started: ${botId}`);
     }
 
-    async stopBot(bot: Bot): Promise<void> {
-        const index = this.bots.indexOf(bot);
+    async stopBot(botId: string): Promise<void> {
+        const index = this.bots.findIndex((bot) => bot.id === botId);
         if (index === -1) {
             throw new Error('Bot not found.');
         }
         this.bots[index].isActive = false;
-        logger.info(`Bot stopped: ${bot.id}`);
+        logger.info(`Bot stopped: ${botId}`);
     }
 
-    async cashOutBot(bot: Bot): Promise<void> {
-        const index = this.bots.indexOf(bot);
+    async cashOutBot(botId: string): Promise<void> {
+        const index = this.bots.findIndex((bot) => bot.id === botId);
         if (index === -1) {
             throw new Error('Bot not found.');
         }
@@ -88,6 +87,15 @@ export class BotManager {
             throw new Error('Bot not found.');
         }
         return bot;
+    }
+
+    async getBotsByUser(userId: string): Promise<Bot[]> {
+        return await this.botService.getAllBotsByUserId(userId);
+    }
+
+    async deleteBot(botId: string): Promise<void> {
+        await this.botService.deleteBot(botId);
+        this.bots.splice(this.bots.findIndex((bot) => bot.id === botId), 1);
     }
 
     // TODO: Update bot
