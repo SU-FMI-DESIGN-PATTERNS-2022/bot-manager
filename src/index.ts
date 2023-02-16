@@ -3,24 +3,25 @@ import http from 'http';
 import cors from 'cors';
 import dotenv from 'dotenv';
 
-import mongoose from './config/mongoose';
+import mongoose from './services/database-service';
 
 import errorHandler from './middlewares/errorHandler';
 
-// import router from './routes';
+import router from './routes/routes';
 
 import logger from './utils/logger';
 
 import { PORT } from './config/config';
 
-// dotenv.config();
+dotenv.config();
 const app = express();
 
-// mongoose.connectDB(() => afterConnect(app), false);
+mongoose.connectToDatabase(() => afterConnect(app), false);
+
 
 app.use(cors());
 app.use(express.json());
-// app.use(router);
+app.use(router);
 app.use(errorHandler);
 
 let server: http.Server | undefined;
@@ -34,6 +35,10 @@ process.on('SIGTERM', () => {
       logger.info('The server has been stopped.');
     });
   }
+});
+
+process.on('ready', () => {
+
 });
 
 /**
