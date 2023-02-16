@@ -1,4 +1,4 @@
-class Token {
+interface Token {
     symbol: string;
     barHigh: number;
     barLow: number;
@@ -6,32 +6,41 @@ class Token {
     barClose: number;
 }
 
-function getResponseObject(response: string) {
+/**
+ * @param response
+ */
+function getResponseObject(response: string): any {
     return JSON.parse(response);
 }
 
-function getTokenArray(responseObject) : Token[] {
+/**
+ * @param responseObject
+ */
+function getTokenArray(responseObject: any) : any[] {
     return responseObject.data;
 }
 
+/**
+ * @param n
+ */
 function averageLastNDays(n: number) : number {
-    var response = "";
+    const response = '';
 
-    var responseObject = getResponseObject(response);
-    var tokenArray = getTokenArray(responseObject);
-    
-    var closingPrices : number[] = [];
+    const responseObject = getResponseObject(response);
+    const tokenArray = getTokenArray(responseObject);
+
+    const closingPrices : number[] = [];
 
     for (let i = 0; i < tokenArray.length; i++) {
-        var token = tokenArray[i];
-        var price = token.barClose;
+        const token = tokenArray[i];
+        const price = token.barClose;
 
         closingPrices.push(price);
     }
-    
-    var sum = 0;
 
-    for(let i=0;i<closingPrices.length;i++) {
+    let sum = 0;
+
+    for (let i=0; i<closingPrices.length; i++) {
         sum += closingPrices[i];
     }
 
@@ -41,7 +50,7 @@ function averageLastNDays(n: number) : number {
 interface Strategy {
     name: string;
     periods: number[]; // in days
-    
+
     execute(periods: number[]): void;
 }
 
@@ -50,19 +59,18 @@ class SMABuySell implements Strategy {
     periods: number[];
 
     constructor(periods: number[]) {
-        this.name = "sma buy sell";
+        this.name = 'sma buy sell';
         this.periods = periods;
     }
 
     execute(periods: number[]): void {
         const period = periods[0];
-        var avg = averageLastNDays(period);
-        var currClosingPrice = 0;
+        const avg = averageLastNDays(period);
+        const currClosingPrice = 0;
 
-        if(avg > currClosingPrice) {
+        if (avg > currClosingPrice) {
             // buy signal
-        }
-        else if(avg < currClosingPrice) {
+        } else if (avg < currClosingPrice) {
             // sell signal
         }
     }
@@ -73,7 +81,7 @@ class SMACrossover implements Strategy {
     periods: number[];
 
     constructor(periods: number[]) {
-        this.name = "sma crossover";
+        this.name = 'sma crossover';
         this.periods = periods;
     }
 
@@ -81,30 +89,29 @@ class SMACrossover implements Strategy {
         const period1 = periods[0];
         const period2 = periods[1];
 
-        var avg1 = averageLastNDays(period1);
-        var avg2 = averageLastNDays(period2);
-        
-        var prevAvg1 = 0;
-        var prevAvg2 = 0;
+        const avg1 = averageLastNDays(period1);
+        const avg2 = averageLastNDays(period2);
 
-        if(prevAvg1 < prevAvg2 && avg1 > avg2) {
+        const prevAvg1 = 0;
+        const prevAvg2 = 0;
+
+        if (prevAvg1 < prevAvg2 && avg1 > avg2) {
             // buy signal
-        }
-        else if(prevAvg2 < prevAvg1 && avg2 > avg1) {
+        } else if (prevAvg2 < prevAvg1 && avg2 > avg1) {
             // sell signal
         }
     }
 }
 
 class Bot {
-    name: string
-    userID: string
-    ticker: string
-    isActive: boolean
-    balance: number
-    strategy: Strategy
+    name: string;
+    userID: string;
+    ticker: string;
+    isActive: boolean;
+    balance: number;
+    strategy: Strategy;
 
-    constructor(name: string,userID: string,ticker: string,strategy: Strategy,balance: number = 0) {
+    constructor(name: string, userID: string, ticker: string, strategy: Strategy, balance: number = 0) {
         this.name = name;
         this.userID = userID;
         this.ticker = ticker;
@@ -114,17 +121,17 @@ class Bot {
         this.isActive = false;
     }
 
-    start() {
+    start(): void {
         this.isActive = true;
     }
 
-    stop() {
+    stop(): void {
         this.isActive = false;
     }
 
-    cashOut(amount: number) {
+    cashOut(amount: number): void {
         if (this.balance - amount < 0) {
-            console.error("Can't cash out, bot balance can't be negative");
+            console.error('Can\'t cash out, bot balance can\'t be negative');
             return;
         }
 
@@ -133,15 +140,15 @@ class Bot {
         this.balance -= amount;
     }
 
-    addCash(amount: number) {
+    addCash(amount: number): void {
         this.balance += amount;
     }
 
-    changeStrategy(strategy: Strategy) {
+    changeStrategy(strategy: Strategy): void {
         this.strategy = strategy;
     }
 
-    executeStrategy(periods: number[]) {
+    executeStrategy(periods: number[]): void {
         this.strategy.execute(periods);
     }
 }

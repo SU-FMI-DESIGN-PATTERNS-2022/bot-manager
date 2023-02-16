@@ -12,6 +12,7 @@ import router from './routes/routes';
 import logger from './utils/logger';
 
 import { PORT } from './config/config';
+import { BotManager } from './controllers/botManager';
 
 dotenv.config();
 const app = express();
@@ -38,7 +39,8 @@ process.on('SIGTERM', () => {
 });
 
 process.on('ready', () => {
-
+  new BotManager();
+  // TODO add cronjobs for data fetching
 });
 
 /**

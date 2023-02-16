@@ -1,10 +1,10 @@
 import express from 'express';
-import { validate } from 'json-schema';
 // eslint-disable-next-line max-len
 import { cashoutBot, createBot, deleteBot, getAllBots, getAllBotsForUser, getBotById, startBot, stopBot } from '../controllers/bot.controller';
 import { getInfo } from '../controllers/info';
 import { authenticate } from '../middlewares/auth';
 import { isAdmin } from '../middlewares/role';
+import { validate } from '../middlewares/validate';
 import logger from '../utils/logger';
 import { botValidation } from '../validations/bot';
 
@@ -20,7 +20,7 @@ routes.get('', function (req: express.Request, res: express.Response) {
 routes.get('/info', getInfo);
 
 routes.get('/bots/', authenticate, isAdmin, getAllBots); // For ADMIN
-routes.get('/bots/userId', authenticate, getAllBotsForUser);
+routes.get('/bots/:userId', authenticate, getAllBotsForUser);
 routes.get('/bots/:botId', authenticate, getBotById);
 routes.post('/bots/create', authenticate, botValidation, validate, createBot);
 routes.delete('/bots/:botId', authenticate, deleteBot);

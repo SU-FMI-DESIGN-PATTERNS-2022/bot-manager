@@ -44,7 +44,7 @@ export const createBot = async (req: Request, res: Response, next: NextFunction)
 
 export const deleteBot = async(req: Request, res: Response, next: NextFunction): Promise<void> => {
     await botManager.deleteBot(req.params.botId)
-        .then((bot) => {
+        .then(() => {
             res.status(200).send({ data: 'The bot has been deleted successfully.' });
         })
         .catch((err) => {
