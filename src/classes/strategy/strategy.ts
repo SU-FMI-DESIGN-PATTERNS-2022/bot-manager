@@ -1,3 +1,4 @@
+
 interface Token {
     symbol: string;
     barHigh: number;
@@ -47,14 +48,15 @@ function averageLastNDays(n: number) : number {
     return sum / n;
 }
 
-interface Strategy {
+// Abstract factory - one abstract class with different children
+export interface Strategy {
     name: string;
     periods: number[]; // in days
 
-    execute(periods: number[]): void;
+    execute(botId: string): void;
 }
 
-class SMABuySell implements Strategy {
+export class SMABuySell implements Strategy {
     name: string;
     periods: number[];
 
@@ -63,20 +65,20 @@ class SMABuySell implements Strategy {
         this.periods = periods;
     }
 
-    execute(periods: number[]): void {
-        const period = periods[0];
+    execute(botId: string): void {
+        const period = this.periods[0];
         const avg = averageLastNDays(period);
         const currClosingPrice = 0;
 
         if (avg > currClosingPrice) {
-            // buy signal
+            // buy signal with the botId
         } else if (avg < currClosingPrice) {
-            // sell signal
+            // sell signal with the botId
         }
     }
 }
 
-class SMACrossover implements Strategy {
+export class SMACrossover implements Strategy {
     name: string;
     periods: number[];
 
@@ -85,9 +87,9 @@ class SMACrossover implements Strategy {
         this.periods = periods;
     }
 
-    execute(periods: number[]): void {
-        const period1 = periods[0];
-        const period2 = periods[1];
+    execute(botId: string): void {
+        const period1 = this.periods[0];
+        const period2 = this.periods[1];
 
         const avg1 = averageLastNDays(period1);
         const avg2 = averageLastNDays(period2);
@@ -96,59 +98,11 @@ class SMACrossover implements Strategy {
         const prevAvg2 = 0;
 
         if (prevAvg1 < prevAvg2 && avg1 > avg2) {
-            // buy signal
+            // buy signal with the botId
         } else if (prevAvg2 < prevAvg1 && avg2 > avg1) {
-            // sell signal
+            // sell signal with the botId
         }
     }
 }
 
-class Bot {
-    name: string;
-    userID: string;
-    ticker: string;
-    isActive: boolean;
-    balance: number;
-    strategy: Strategy;
 
-    constructor(name: string, userID: string, ticker: string, strategy: Strategy, balance: number = 0) {
-        this.name = name;
-        this.userID = userID;
-        this.ticker = ticker;
-        this.balance = balance;
-        this.strategy = strategy;
-
-        this.isActive = false;
-    }
-
-    start(): void {
-        this.isActive = true;
-    }
-
-    stop(): void {
-        this.isActive = false;
-    }
-
-    cashOut(amount: number): void {
-        if (this.balance - amount < 0) {
-            console.error('Can\'t cash out, bot balance can\'t be negative');
-            return;
-        }
-
-        // add balance to users account before/after this
-
-        this.balance -= amount;
-    }
-
-    addCash(amount: number): void {
-        this.balance += amount;
-    }
-
-    changeStrategy(strategy: Strategy): void {
-        this.strategy = strategy;
-    }
-
-    executeStrategy(periods: number[]): void {
-        this.strategy.execute(periods);
-    }
-}

@@ -1,7 +1,11 @@
-import { Bot } from '../models/bot-model';
 import logger from '../utils/logger';
 import { BotService } from '../services/bot-service';
+import { IBot } from '../models/bot-model';
+import { Bot } from '../classes/bot';
 
+// TODO create observer
+
+// Mediator / Proxy / Singleton
 export class BotManager {
     private static instance: BotManager;
     private bots: Bot[] = [];
@@ -9,7 +13,11 @@ export class BotManager {
     public constructor() {
         this.botService = new BotService();
         this.botService.getAllBots().then((bots) => {
-            this.bots = bots;
+            for (const bot of bots) {
+                if (bot.isActive) {
+                    this.bots.push(new Bot(bot));
+                }
+            }
         });
     }
 
@@ -26,7 +34,7 @@ export class BotManager {
         initBalance: number,
         isActive: boolean,
         userId: string
-    ): Promise<Bot> {
+    ): Promise<IBot> {
         // TODO: check if user has enough cash, if not throw an error
 
         const bot = await this.botService.createBot(
@@ -38,7 +46,8 @@ export class BotManager {
             userId
         );
 
-        this.bots.push(bot);
+        this.bots.push(new Bot(bot));
+
         return bot;
     }
 
@@ -47,7 +56,9 @@ export class BotManager {
         if (index === -1) {
             throw new Error('Bot not found.');
         }
-        this.bots[index].isActive = true;
+        this.bots[index].start();
+        this.botService.updateBot(this.bots[index].id, this.bots[index]);
+
         logger.info(`Bot started: ${botId}`);
     }
 
@@ -56,8 +67,18 @@ export class BotManager {
         if (index === -1) {
             throw new Error('Bot not found.');
         }
-        this.bots[index].isActive = false;
+        this.bots[index].stop();
+        this.botService.updateBot(this.bots[index].id, this.bots[index]);
         logger.info(`Bot stopped: ${botId}`);
+    }
+
+    async changeBotBalance(botId: string, newBalance: number): Promise<void> {
+        const index = this.bots.findIndex((bot) => bot.id === botId);
+        if (index === -1) {
+            throw new Error('Bot not found.');
+        }
+        this.bots[index].changeCurrentBalance(newBalance);
+        this.botService.updateBot(this.bots[index].id, this.bots[index]);
     }
 
     async cashOutBot(botId: string): Promise<void> {
@@ -65,8 +86,11 @@ export class BotManager {
         if (index === -1) {
             throw new Error('Bot not found.');
         }
-
-        // todo: add the money to the user's balance
+        const res = this.bots[index].cashOut();
+        this.botService.updateBot(this.bots[index].id, this.bots[index]);
+        if (res > 0) {
+        // todo: add res to the user's balance
+        }
     }
 
     async getAllBots(): Promise<Bot[]> {
@@ -89,7 +113,7 @@ export class BotManager {
         return bot;
     }
 
-    async getBotsByUser(userId: string): Promise<Bot[]> {
+    async getBotsByUser(userId: string): Promise<IBot[]> {
         return await this.botService.getAllBotsByUserId(userId);
     }
 
@@ -97,8 +121,6 @@ export class BotManager {
         await this.botService.deleteBot(botId);
         this.bots.splice(this.bots.findIndex((bot) => bot.id === botId), 1);
     }
-
-    // TODO: Update bot
 }
 
 export default new BotManager();

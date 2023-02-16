@@ -1,4 +1,4 @@
-import BotModel, { Bot } from '../models/bot-model';
+import BotModel, { IBot } from '../models/bot-model';
 import logger from '../utils/logger';
 
 export class BotService {
@@ -11,7 +11,7 @@ export class BotService {
         currentBalance: number,
         isActive: boolean,
         userId: string
-    ): Promise<Bot> {
+    ): Promise<IBot> {
         const bot = await BotModel.create({
             ticker,
             strategy,
@@ -27,7 +27,7 @@ export class BotService {
         return bot;
     }
 
-    async getBotById(id: string): Promise<Bot> {
+    async getBotById(id: string): Promise<IBot> {
         const bot = await BotModel.findById(id);
 
         if (!bot) {
@@ -38,21 +38,21 @@ export class BotService {
         return bot;
     }
 
-    async getAllBots(): Promise<Bot[]> {
+    async getAllBots(): Promise<IBot[]> {
         const bots = await BotModel.find();
 
         logger.info(`All bots retrieved.`);
         return bots;
     }
 
-    async getAllBotsByUserId(userId: string): Promise<Bot[]> {
+    async getAllBotsByUserId(userId: string): Promise<IBot[]> {
         const bots = await BotModel.find({ userId });
 
         logger.info(`All bots retrieved for user: ${userId}`);
         return bots;
     }
 
-    async updateBot(id: string, bot: Bot): Promise<Bot> {
+    async updateBot(id: string, bot: IBot): Promise<IBot> {
         const updatedBot = await BotModel.findByIdAndUpdate(
             id,
             {

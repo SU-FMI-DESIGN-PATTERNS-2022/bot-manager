@@ -1,6 +1,6 @@
 import mongoose, { Model } from 'mongoose';
 
-export interface Bot {
+export interface IBot {
     id: string;
     ticker: string;
     strategy: string;
@@ -47,6 +47,6 @@ export const BotSchema = new mongoose.Schema({
     },
 });
 
-const BotModel: Model<Bot> = mongoose.model('Bot', BotSchema);
+const BotModel: Model<IBot> = mongoose.model('Bot', BotSchema);
 
 export default BotModel;

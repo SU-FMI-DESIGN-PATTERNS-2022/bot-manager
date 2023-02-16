@@ -19,6 +19,7 @@ routes.get('', function (req: express.Request, res: express.Response) {
 
 routes.get('/info', getInfo);
 
+// Chain of responsibility / Facade
 routes.get('/bots/', authenticate, isAdmin, getAllBots); // For ADMIN
 routes.get('/bots/:userId', authenticate, getAllBotsForUser);
 routes.get('/bots/:botId', authenticate, getBotById);
